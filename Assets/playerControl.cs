@@ -1,9 +1,9 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using UnityEngine;
 
 public class playerControl : MonoBehaviour
-{
-    //取得角色位置
+{ //取得角色位置
     public Transform charcaterTransform;
 
     //取得攝影機位置
@@ -23,6 +23,9 @@ public class playerControl : MonoBehaviour
 
     //角色重力
     public float charactGravity = 2.0f;
+
+    //是否在地板上
+    private bool isGround = true;
 
     //玩家攝影機
     public Camera playerCamera;
@@ -49,10 +52,14 @@ public class playerControl : MonoBehaviour
     private float shootTime = 0;
 
     //射擊音效
-    public AudioClip shootAudio;
-
+    //public AudioClip shootAudio;
     //音效資源
-    private AudioSource shoot;
+    //public AudioSource shoot;
+
+    public GameObject bulletTest;
+
+    //子彈perfab
+    public GameObject bullet;
 
     private void Start()
     {
@@ -76,7 +83,7 @@ public class playerControl : MonoBehaviour
         muzzlepoint = GameObject.Find("muzzlepoint_temp");
 
         //取得音效組件
-        shoot.GetComponent<AudioSource>();
+        //shoot.GetComponent<AudioSource>();
     }
 
     private void Update()
@@ -99,7 +106,7 @@ public class playerControl : MonoBehaviour
         shootTime -= Time.deltaTime;
 
         //滑鼠游標狀態
-        if (Input.GetKeyDown(KeyCode.LeftControl) || Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetKeyDown(KeyCode.Escape))
         {
             curosrState();
         }
@@ -112,7 +119,13 @@ public class playerControl : MonoBehaviour
 
         //charactGravity
         y -= charactGravity * Time.deltaTime;
+        // jump
+        if (Input.GetKeyDown(KeyCode.Space) && player.isGrounded == true)
+        {
+            y += jumpHight * Time.deltaTime;
+        }
 
+        //running
         if (Input.GetKey(KeyCode.LeftShift))
         {
             moveSpeed = movSpeed * speedBonus;
@@ -141,19 +154,14 @@ public class playerControl : MonoBehaviour
             x += moveSpeed * Time.deltaTime;
         }
 
-        // jump
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            y += jumpHight * Time.deltaTime;
-        }
-
         // Shoot
         if (Input.GetMouseButton(0) && shootTime <= 0.0f)
         {
+            //Debug.Log("射擊");
             shootTime = 0.1f;
 
             //射擊音效
-            shoot.PlayOneShot(shootAudio, 0.9f);
+            //shoot.PlayOneShot(shootAudio, 1.0f);
 
             //減少彈藥，更新彈藥 UI
 
@@ -161,11 +169,25 @@ public class playerControl : MonoBehaviour
             RaycastHit info;
 
             //射出射線
-            bool hit = Physics.Raycast(muzzlepoint.transform.position, cameraTransform.TransformDirection(Vector3.forward), out info, 100.0f, shootedLayer);
+            bool hit = Physics.Raycast(cameraTransform.position, cameraTransform.TransformDirection(Vector3.forward), out info, 100.0f, shootedLayer);
 
             if (hit)
             {
+                if (info.transform.tag.CompareTo("enemy") == 0)
+                {
+                }
+                //擊中點播放特效
+                Instantiate(bulletFX, info.point, info.transform.rotation);
+                Instantiate(bulletTest, info.point, info.transform.rotation);
             }
+
+            //
+
+            //生成一個子彈
+            Instantiate(bullet, muzzlepoint.transform.position, muzzlepoint.transform.rotation);
+            colliderDestory.CatchPoint(info.point);
+
+            //Debug.Log("point:" + info.normal);
         }
 
         player.Move(charcaterTransform.TransformDirection(new Vector3(x, y, z)));

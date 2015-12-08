@@ -68,6 +68,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\autoDestory.cs" />
+    <Compile Include="Assets\colliderDestory.cs" />
+    <Compile Include="Assets\enemy.cs" />
+    <Compile Include="Assets\enemyUnable.cs" />
     <Compile Include="Assets\playerControl.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\SyntaxTree\UnityVS\2015\UnityVS.CSharp.targets" />
